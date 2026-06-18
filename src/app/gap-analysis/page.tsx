@@ -18,8 +18,10 @@ export default function GapAnalysisPage() {
     try {
       const r = await analyzeGaps(jd, resume)
       setResult(r)
-    } catch (e: any) { setError(e.message || '分析失败') }
-    finally { setLoading(false) }
+    } catch (e: unknown) {
+      const errMsg = e instanceof Error ? e.message : '分析失败'
+      setError(errMsg)
+    } finally { setLoading(false) }
   }
 
   const priorityColor = (p: string) => {

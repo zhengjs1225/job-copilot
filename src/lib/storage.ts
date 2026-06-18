@@ -22,7 +22,6 @@ export interface Resume {
 
 const APPS_KEY = 'job_copilot_applications'
 const RESUMES_KEY = 'job_copilot_resumes'
-const SETTINGS_KEY = 'job_copilot_settings'
 
 // --- Applications ---
 export function getApplications(): Application[] {

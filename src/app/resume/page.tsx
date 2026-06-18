@@ -22,8 +22,10 @@ export default function ResumePage() {
     try {
       const r = await customizeResume(resume, jd)
       setResult(r)
-    } catch (e: any) { setError(e.message || '改写失败') }
-    finally { setLoading(false) }
+    } catch (e: unknown) {
+      const errMsg = e instanceof Error ? e.message : '改写失败'
+      setError(errMsg)
+    } finally { setLoading(false) }
   }
 
   const handleSaveResume = () => {

@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from 'react'
 import Link from 'next/link'
 import { ApiKeySetup } from '@/components/ApiKeySetup'
 import { callDeepSeek, hasApiKey } from '@/lib/ai'
-import { getApplications, getApplicationStats, saveApplication, type Application } from '@/lib/storage'
+import { getApplications, getApplicationStats } from '@/lib/storage'
 
 interface Message {
   role: 'user' | 'assistant'
@@ -61,35 +61,9 @@ interface Conversation {
   createdAt: string
 }
 
-export default function ChatPage() {
-  const [messages, setMessages] = useState<Message[]>([])
-  const [input, setInput] = useState('')
-  const [loading, setLoading] = useState(false)
-  const [conversations, setConversations] = useState<Conversation[]>([])
-  const [currentConvId, setCurrentConvId] = useState<string>('')
-  const [showSidebar, setShowSidebar] = useState(false)
-  const messagesEndRef = useRef<HTMLDivElement>(null)
-  const inputRef = useRef<HTMLTextAreaElement>(null)
-
-  // Load conversations from localStorage
-  useEffect(() => {
-    try {
-      const saved = JSON.parse(localStorage.getItem('jc_conversations') || '[]')
-      setConversations(saved)
-    } catch {}
-  }, [])
-
-  // Auto scroll to bottom
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }, [messages])
-
-  // Welcome message on first load
-  useEffect(() => {
-    if (messages.length === 0 && !currentConvId) {
-      const welcome: Message = {
-        role: 'assistant',
-        content: `# 👋 你好！我是 Job Copilot
+const WELCOME_MSG: Message = {
+  role: 'assistant',
+  content: `# 👋 你好！我是 Job Copilot
 
 你的 AI 求职副驾驶，可以帮你：
 
@@ -100,11 +74,26 @@ export default function ChatPage() {
 📋 **申请追踪** — 查投递进度、转化率
 
 **开始吧！你想先干什么？** 👇`,
-        id: 'welcome',
-      }
-      setMessages([welcome])
-    }
-  }, [])
+  id: 'welcome',
+}
+
+export default function ChatPage() {
+  const [messages, setMessages] = useState<Message[]>([WELCOME_MSG])
+  const [input, setInput] = useState('')
+  const [loading, setLoading] = useState(false)
+  const [conversations, setConversations] = useState<Conversation[]>(() => {
+    if (typeof window === 'undefined') return []
+    try { return JSON.parse(localStorage.getItem('jc_conversations') || '[]') } catch { return [] }
+  })
+  const [currentConvId, setCurrentConvId] = useState<string>('')
+  const [showSidebar, setShowSidebar] = useState(false)
+  const messagesEndRef = useRef<HTMLDivElement>(null)
+  const inputRef = useRef<HTMLTextAreaElement>(null)
+
+  // Auto scroll to bottom
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+  }, [messages])
 
   const saveConversation = (msgs: Message[], convId?: string) => {
     const id = convId || crypto.randomUUID?.() || `${Date.now()}`
@@ -160,10 +149,11 @@ export default function ChatPage() {
       const finalMessages = [...newMessages, assistantMsg]
       setMessages(finalMessages)
       saveConversation(finalMessages, convId)
-    } catch (e: any) {
+    } catch (e: unknown) {
+      const errMsg = e instanceof Error ? e.message : '请求失败，请重试'
       const errorMsg: Message = {
         role: 'assistant',
-        content: `❌ **出错了**：${e.message || '请求失败，请重试'}`,
+        content: `❌ **出错了**：${errMsg}`,
         id: `${Date.now()}-error`,
       }
       setMessages([...newMessages, errorMsg])
@@ -218,7 +208,7 @@ export default function ChatPage() {
   // Format message content with simple markdown rendering
   const renderContent = (content: string) => {
     // Convert markdown headings, bold, lists, code
-    let html = content
+    const html = content
       .replace(/### (.+)/g, '<h3 class="text-lg font-semibold text-white mt-4 mb-2">$1</h3>')
       .replace(/## (.+)/g, '<h2 class="text-xl font-bold text-white mt-5 mb-2">$1</h2>')
       .replace(/# (.+)/g, '<h1 class="text-2xl font-bold text-white mt-5 mb-3">$1</h1>')

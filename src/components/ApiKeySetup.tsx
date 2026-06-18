@@ -1,15 +1,11 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { hasApiKey, setApiKey } from '@/lib/ai'
 
 export function ApiKeySetup({ onDone }: { onDone?: () => void }) {
   const [key, setKey] = useState('')
-  const [saved, setSaved] = useState(false)
-
-  useEffect(() => {
-    if (hasApiKey()) setSaved(true)
-  }, [])
+  const [saved, setSaved] = useState(hasApiKey())
 
   if (saved) return null
 

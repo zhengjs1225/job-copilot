@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import Link from 'next/link'
 import { getApplications, saveApplication, updateApplication, deleteApplication, getApplicationStats, type Application } from '@/lib/storage'
 
@@ -15,7 +15,10 @@ const STATUSES = [
 ] as const
 
 export default function TrackerPage() {
-  const [apps, setApps] = useState<Application[]>([])
+  const [apps, setApps] = useState<Application[]>(() => {
+    if (typeof window === 'undefined') return []
+    try { return JSON.parse(localStorage.getItem('job_copilot_applications') || '[]') } catch { return [] }
+  })
   const [showForm, setShowForm] = useState(false)
   const [stats, setStats] = useState({ total: 0, applied: 0, interviews: 0, offers: 0, rejects: 0, conversionRate: '0' })
 
@@ -31,8 +34,6 @@ export default function TrackerPage() {
     setApps(all)
     setStats(getApplicationStats())
   }
-
-  useEffect(() => { refresh() }, [])
 
   const handleAdd = () => {
     if (!company.trim() || !position.trim()) return

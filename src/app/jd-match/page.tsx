@@ -29,8 +29,9 @@ export default function JDMatchPage() {
       const r = await analyzeJDMatch(jd, resume)
       setResult(r)
       setActiveTab('result')
-    } catch (e: any) {
-      setError(e.message || '分析失败，请重试')
+    } catch (e: unknown) {
+      const errMsg = e instanceof Error ? e.message : '分析失败'
+      setError(errMsg || '分析失败，请重试')
     } finally {
       setLoading(false)
     }

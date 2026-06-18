@@ -17,8 +17,10 @@ export default function CompanyPage() {
     try {
       const r = await researchCompany(company.trim())
       setResult(r)
-    } catch (e: any) { setError(e.message || '研究失败') }
-    finally { setLoading(false) }
+    } catch (e: unknown) {
+      const errMsg = e instanceof Error ? e.message : '研究失败'
+      setError(errMsg)
+    } finally { setLoading(false) }
   }
 
   return (
