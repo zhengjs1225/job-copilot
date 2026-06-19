@@ -2,7 +2,7 @@
 // 用户不需要配任何 Key，开箱即用
 
 // 部署 Worker 后把这里的地址换成你的 Worker 域名
-const WORKER_BASE = process.env.NEXT_PUBLIC_WORKER_URL || 'http://localhost:8787'
+const WORKER_BASE = process.env.NEXT_PUBLIC_WORKER_URL || 'https://job-copilot-api.1209928111.workers.dev'
 
 export async function callAI(
   messages: { role: 'system' | 'user' | 'assistant'; content: string }[],
