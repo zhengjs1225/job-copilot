@@ -2,8 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react'
 import Link from 'next/link'
-import { ApiKeySetup } from '@/components/ApiKeySetup'
-import { callDeepSeek, hasApiKey } from '@/lib/ai'
+import { callAI } from '@/lib/ai'
 import { getApplications, getApplicationStats } from '@/lib/storage'
 
 interface Message {
@@ -139,7 +138,7 @@ export default function ChatPage() {
         })),
       ]
 
-      const reply = await callDeepSeek(apiMessages, { temperature: 0.5, max_tokens: 4096 })
+      const reply = await callAI(apiMessages, { temperature: 0.5, max_tokens: 4096 })
 
       const assistantMsg: Message = {
         role: 'assistant',
@@ -224,7 +223,6 @@ export default function ChatPage() {
 
   return (
     <div className="h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 flex overflow-hidden">
-      <ApiKeySetup />
 
       {/* Sidebar */}
       <div className={`${showSidebar ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0 fixed lg:static inset-y-0 left-0 z-40 w-72 bg-slate-950/95 border-r border-slate-800 transition-transform duration-200 flex flex-col`}>
@@ -288,12 +286,7 @@ export default function ChatPage() {
             ☰
           </button>
           <div className="flex-1" />
-          {!hasApiKey() && (
-            <span className="text-xs text-yellow-400">⚠️ 未设置 API Key</span>
-          )}
-          {hasApiKey() && (
-            <span className="text-xs text-emerald-500">✅ API Key 已配置</span>
-          )}
+          <span className="text-xs text-emerald-500">✅ 云端 AI 已就绪</span>
         </div>
 
         {/* Messages */}

@@ -2,8 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { ApiKeySetup } from '@/components/ApiKeySetup'
-import { analyzeGaps, hasApiKey, type GapAnalysis } from '@/lib/ai'
+import { analyzeGaps, type GapAnalysis } from '@/lib/ai'
 
 export default function GapAnalysisPage() {
   const [jd, setJd] = useState('')
@@ -32,7 +31,6 @@ export default function GapAnalysisPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950">
-      <ApiKeySetup />
       <header className="border-b border-slate-800">
         <div className="max-w-5xl mx-auto px-6 py-6">
           <Link href="/" className="text-slate-400 hover:text-white text-sm transition-colors">← 返回首页</Link>
@@ -57,7 +55,7 @@ export default function GapAnalysisPage() {
                 className="w-full bg-slate-900/70 border border-slate-700 rounded-xl px-4 py-3 text-white placeholder-slate-600 focus:outline-none focus:border-purple-500 resize-y font-mono text-sm"
                 placeholder="粘贴简历..." />
             </div>
-            <button onClick={handleAnalyze} disabled={loading || !hasApiKey()}
+            <button onClick={handleAnalyze} disabled={loading}
               className="w-full bg-purple-600 hover:bg-purple-500 disabled:bg-slate-700 disabled:text-slate-500 text-white font-medium rounded-xl px-6 py-4 transition-colors">
               {loading ? '🔬 分析中...' : '🔬 开始 Gap 分析'}
             </button>

@@ -1,34 +1,16 @@
-// Browser-side DeepSeek API client
-// API key is stored in localStorage, never on server
+// AI API client — 通过 Cloudflare Worker 代理调用 DeepSeek
+// 用户不需要配任何 Key，开箱即用
 
-const DEEPSEEK_API = 'https://api.deepseek.com/v1/chat/completions'
+// 部署 Worker 后把这里的地址换成你的 Worker 域名
+const WORKER_BASE = process.env.NEXT_PUBLIC_WORKER_URL || 'http://localhost:8787'
 
-export function getApiKey(): string {
-  if (typeof window === 'undefined') return ''
-  return localStorage.getItem('job_copilot_deepseek_key') || ''
-}
-
-export function setApiKey(key: string) {
-  localStorage.setItem('job_copilot_deepseek_key', key)
-}
-
-export function hasApiKey(): boolean {
-  return !!getApiKey()
-}
-
-export async function callDeepSeek(
+export async function callAI(
   messages: { role: 'system' | 'user' | 'assistant'; content: string }[],
   options?: { temperature?: number; max_tokens?: number }
 ): Promise<string> {
-  const key = getApiKey()
-  if (!key) throw new Error('请先设置 DeepSeek API Key')
-
-  const res = await fetch(DEEPSEEK_API, {
+  const res = await fetch(`${WORKER_BASE}/v1/chat/completions`, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${key}`,
-    },
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       model: 'deepseek-chat',
       messages,
@@ -39,8 +21,8 @@ export async function callDeepSeek(
   })
 
   if (!res.ok) {
-    const err = await res.text()
-    throw new Error(`API 错误 (${res.status}): ${err}`)
+    const err = await res.json().catch(() => ({ error: { message: `HTTP ${res.status}` } }))
+    throw new Error(err.error?.message || `请求失败 (${res.status})`)
   }
 
   const data = await res.json()
@@ -49,11 +31,11 @@ export async function callDeepSeek(
 
 // --- JD Match analysis ---
 export interface JDMatchResult {
-  score: number            // 0-100 match score
-  summary: string          // one-line verdict
-  strengths: string[]      // matching points
-  gaps: string[]           // missing points
-  recommendations: string[] // what to do
+  score: number
+  summary: string
+  strengths: string[]
+  gaps: string[]
+  recommendations: string[]
 }
 
 export async function analyzeJDMatch(jd: string, resume: string): Promise<JDMatchResult> {
@@ -67,20 +49,11 @@ export async function analyzeJDMatch(jd: string, resume: string): Promise<JDMatc
   "recommendations": ["建议1", "建议2", ...]
 }`
 
-  const userPrompt = `【岗位JD】
-${jd}
-
-【我的简历】
-${resume}
-
-请分析匹配度，输出JSON格式的结果。`
-
-  const text = await callDeepSeek([
+  const text = await callAI([
     { role: 'system', content: systemPrompt },
-    { role: 'user', content: userPrompt },
+    { role: 'user', content: `【岗位JD】\n${jd}\n\n【我的简历】\n${resume}\n\n请分析匹配度，输出JSON格式的结果。` },
   ], { temperature: 0.2 })
 
-  // Parse JSON from response (handle markdown-wrapped JSON)
   const jsonMatch = text.match(/\{[^]*\}/)
   if (!jsonMatch) throw new Error('AI 返回格式异常，请重试')
   return JSON.parse(jsonMatch[0])
@@ -106,13 +79,9 @@ export async function analyzeGaps(jd: string, resume: string): Promise<GapAnalys
   "actionablePlan": ["行动1", "行动2", ...]
 }`
 
-  const text = await callDeepSeek([
+  const text = await callAI([
     { role: 'system', content: systemPrompt },
-    { role: 'user', content: `JD:
-${jd}
-
-简历:
-${resume}` },
+    { role: 'user', content: `JD:\n${jd}\n\n简历:\n${resume}` },
   ], { temperature: 0.2 })
 
   const jsonMatch = text.match(/\{[^]*\}/)
@@ -138,13 +107,9 @@ export async function customizeResume(resume: string, jd: string): Promise<Resum
   "coverLetter": "求职信正文（300字以内）"
 }`
 
-  const text = await callDeepSeek([
+  const text = await callAI([
     { role: 'system', content: systemPrompt },
-    { role: 'user', content: `简历:
-${resume}
-
-目标JD:
-${jd}` },
+    { role: 'user', content: `简历:\n${resume}\n\n目标JD:\n${jd}` },
   ], { temperature: 0.3 })
 
   const jsonMatch = text.match(/\{[^]*\}/)
@@ -159,7 +124,7 @@ export interface CompanyResearch {
   culture: string
   recentNews: string[]
   interviewQuestions: { question: string; tips: string }[]
-  score: number  // 匹配分
+  score: number
 }
 
 export async function researchCompany(companyName: string): Promise<CompanyResearch> {
@@ -176,10 +141,9 @@ export async function researchCompany(companyName: string): Promise<CompanyResea
   "score": 0-100的匹配参考分
 }`
 
-  const text = await callDeepSeek([
+  const text = await callAI([
     { role: 'system', content: systemPrompt },
-    { role: 'user', content: `公司名称: ${companyName}
-请输出公司画像和研究报告。` },
+    { role: 'user', content: `公司名称: ${companyName}\n请输出公司画像和研究报告。` },
   ], { temperature: 0.4 })
 
   const jsonMatch = text.match(/\{[^]*\}/)

@@ -2,8 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { ApiKeySetup } from '@/components/ApiKeySetup'
-import { researchCompany, hasApiKey, type CompanyResearch } from '@/lib/ai'
+import { researchCompany, type CompanyResearch } from '@/lib/ai'
 
 export default function CompanyPage() {
   const [company, setCompany] = useState('')
@@ -25,7 +24,6 @@ export default function CompanyPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950">
-      <ApiKeySetup />
       <header className="border-b border-slate-800">
         <div className="max-w-5xl mx-auto px-6 py-6">
           <Link href="/" className="text-slate-400 hover:text-white text-sm transition-colors">← 返回首页</Link>
@@ -41,7 +39,7 @@ export default function CompanyPage() {
             onKeyDown={e => e.key === 'Enter' && handleResearch()}
             placeholder="输入公司名称（如：字节跳动、阿里巴巴、Tencent...）"
             className="flex-1 bg-slate-900/70 border border-slate-700 rounded-xl px-5 py-4 text-white placeholder-slate-600 focus:outline-none focus:border-orange-500 text-lg" />
-          <button onClick={handleResearch} disabled={loading || !hasApiKey() || !company.trim()}
+          <button onClick={handleResearch} disabled={loading || !company.trim()}
             className="bg-orange-600 hover:bg-orange-500 disabled:bg-slate-700 disabled:text-slate-500 text-white font-medium rounded-xl px-8 py-4 transition-colors shrink-0">
             {loading ? '🔍' : '🔍 研究'}
           </button>

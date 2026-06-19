@@ -2,8 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { ApiKeySetup } from '@/components/ApiKeySetup'
-import { analyzeJDMatch, hasApiKey, type JDMatchResult } from '@/lib/ai'
+import { analyzeJDMatch, type JDMatchResult } from '@/lib/ai'
 import { saveApplication, getResumes } from '@/lib/storage'
 
 export default function JDMatchPage() {
@@ -66,7 +65,6 @@ export default function JDMatchPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950">
-      <ApiKeySetup />
       <header className="border-b border-slate-800">
         <div className="max-w-5xl mx-auto px-6 py-6">
           <Link href="/" className="text-slate-400 hover:text-white text-sm transition-colors">← 返回首页</Link>
@@ -135,10 +133,10 @@ export default function JDMatchPage() {
 
             <button
               onClick={handleAnalyze}
-              disabled={loading || !hasApiKey()}
+              disabled={loading}
               className="w-full bg-blue-600 hover:bg-blue-500 disabled:bg-slate-700 disabled:text-slate-500 text-white font-medium rounded-xl px-6 py-4 transition-colors text-lg"
             >
-              {loading ? '🤔 AI 分析中...' : hasApiKey() ? '🚀 分析匹配度' : '请先设置 API Key'}
+              {loading ? '🤔 AI 分析中...' : '🚀 分析匹配度'}
             </button>
 
             {error && (

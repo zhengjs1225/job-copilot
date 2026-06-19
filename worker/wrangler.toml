@@ -1,0 +1,16 @@
+name = "job-copilot-api"
+main = "src/index.ts"
+compatibility_date = "2024-12-01"
+
+# DeepSeek API Key — 通过 `wrangler secret put DEEPSEEK_API_KEY` 设置
+# NEVER commit this to git
+
+# KV namespace for rate limiting
+# 先创建: wrangler kv:namespace create RATE_LIMIT_KV
+# 然后把 binding ID 填入下面
+[[kv_namespaces]]
+binding = "RATE_LIMIT_KV"
+id = ""
+
+# 可选：每日配额（默认 500）
+# vars = { DAILY_QUOTA = "500" }

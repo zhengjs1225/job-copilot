@@ -2,8 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { ApiKeySetup } from '@/components/ApiKeySetup'
-import { customizeResume, hasApiKey, type ResumeCustomization } from '@/lib/ai'
+import { customizeResume, type ResumeCustomization } from '@/lib/ai'
 import { saveResume, getResumes, deleteResume } from '@/lib/storage'
 
 export default function ResumePage() {
@@ -36,7 +35,6 @@ export default function ResumePage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950">
-      <ApiKeySetup />
       <header className="border-b border-slate-800">
         <div className="max-w-5xl mx-auto px-6 py-6">
           <Link href="/" className="text-slate-400 hover:text-white text-sm transition-colors">← 返回首页</Link>
@@ -89,7 +87,7 @@ export default function ResumePage() {
                 className="w-full bg-slate-900/70 border border-slate-700 rounded-xl px-4 py-3 text-white placeholder-slate-600 focus:outline-none focus:border-emerald-500 resize-y font-mono text-sm"
                 placeholder="粘贴 JD..." />
             </div>
-            <button onClick={handleRewrite} disabled={loading || !hasApiKey()}
+            <button onClick={handleRewrite} disabled={loading}
               className="w-full bg-emerald-600 hover:bg-emerald-500 disabled:bg-slate-700 disabled:text-slate-500 text-white font-medium rounded-xl px-6 py-4 transition-colors">
               {loading ? '✍️ AI 改写中...' : '✍️ 定制简历 & 求职信'}
             </button>
