@@ -6,6 +6,7 @@ import { callAI } from '@/lib/ai'
 import { getApplications, getApplicationStats } from '@/lib/storage'
 import { buildSystemPrompt } from '@/lib/prompt'
 import { computeHealthScore, type HealthScore } from '@/lib/health'
+import { ResumeUploader } from '@/components/ResumeUploader'
 
 interface Message {
   role: 'user' | 'assistant'
@@ -78,6 +79,7 @@ export default function ChatPage() {
   const [currentConvId, setCurrentConvId] = useState<string>('')
   const [showSidebar, setShowSidebar] = useState(false)
   const [health, setHealth] = useState<HealthScore>({ overall: 0, funnel: 0, quality: 0, momentum: 0, tips: [] })
+  const [showUploader, setShowUploader] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLTextAreaElement>(null)
 
@@ -149,7 +151,16 @@ export default function ChatPage() {
     setHealth(computeHealthScore())
     setCurrentConvId('')
     setInput('')
+    setShowUploader(false)
     inputRef.current?.focus()
+  }
+
+  const handleResumeUpload = (text: string, fileName: string) => {
+    setShowUploader(false)
+    const msg = `这是我的简历（${fileName}）：\n\n${text.slice(0, 3000)}\n\n请分析这份简历，告诉我怎么样`
+    setInput(msg)
+    // Trigger send after state update
+    setTimeout(() => handleSend(), 50)
   }
 
   const loadConversation = (conv: Conversation) => {
@@ -329,10 +340,27 @@ export default function ChatPage() {
           </div>
         </div>
 
+        {/* Upload popup */}
+        {showUploader && (
+          <div className="border-t border-slate-800 px-4 py-4 bg-slate-900/50">
+            <div className="max-w-3xl mx-auto">
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-sm text-slate-400">📄 上传简历</span>
+                <button onClick={() => setShowUploader(false)} className="text-slate-500 hover:text-white text-sm">✕</button>
+              </div>
+              <ResumeUploader onExtracted={handleResumeUpload} />
+            </div>
+          </div>
+        )}
+
         {/* Input area */}
         <div className="border-t border-slate-800 px-4 py-4">
           <div className="max-w-3xl mx-auto">
             <div className="flex gap-3 items-end bg-slate-900/70 border border-slate-700 rounded-xl px-4 py-3 focus-within:border-blue-500 transition-colors">
+              <button onClick={() => setShowUploader(!showUploader)}
+                className="text-slate-400 hover:text-blue-300 transition-colors px-2 py-2 text-lg shrink-0" title="上传简历">
+                📎
+              </button>
               <textarea ref={inputRef} value={input} onChange={e => setInput(e.target.value)}
                 onKeyDown={handleKeyDown}
                 placeholder="说点什么... 比如：分析这个JD / 研究字节跳动 / 我的求职状态怎么样"

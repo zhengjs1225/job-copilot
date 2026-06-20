@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { analyzeJDMatch, type JDMatchResult } from '@/lib/ai'
+import { ResumeUploader } from '@/components/ResumeUploader'
 import { saveApplication, getResumes } from '@/lib/storage'
 
 export default function JDMatchPage() {
@@ -122,12 +123,13 @@ export default function JDMatchPage() {
 
             <div>
               <label className="block text-sm text-slate-400 mb-2">👤 我的简历</label>
+              <ResumeUploader onExtracted={(text, name) => setResume(text)} label="上传简历文件（PDF/TXT）" />
               <textarea
                 value={resume}
                 onChange={e => setResume(e.target.value)}
-                placeholder="粘贴简历内容（或从上方加载已保存的简历）..."
+                placeholder="粘贴简历内容（或上传文件）..."
                 rows={10}
-                className="w-full bg-slate-900/70 border border-slate-700 rounded-xl px-4 py-3 text-white placeholder-slate-600 focus:outline-none focus:border-blue-500 resize-y font-mono text-sm"
+                className="w-full bg-slate-900/70 border border-slate-700 rounded-xl px-4 py-3 text-white placeholder-slate-600 focus:outline-none focus:border-blue-500 resize-y font-mono text-sm mt-3"
               />
             </div>
 
