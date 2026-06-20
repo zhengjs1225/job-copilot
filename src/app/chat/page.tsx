@@ -78,17 +78,15 @@ export default function ChatPage() {
   })
   const [currentConvId, setCurrentConvId] = useState<string>('')
   const [showSidebar, setShowSidebar] = useState(false)
-  const [health, setHealth] = useState<HealthScore>({ overall: 0, funnel: 0, quality: 0, momentum: 0, tips: [] })
+  // Update health score on mount
+  const [health, setHealth] = useState<HealthScore>(() => {
+    if (typeof window === 'undefined') return { overall: 0, funnel: 0, quality: 0, momentum: 0, tips: [] }
+    return computeHealthScore()
+  })
+
   const [showUploader, setShowUploader] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLTextAreaElement>(null)
-
-  // Update health score on mount and when data changes
-  useEffect(() => {
-    setHealth(computeHealthScore())
-  }, [])
-
-  // Auto scroll to bottom
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages])
